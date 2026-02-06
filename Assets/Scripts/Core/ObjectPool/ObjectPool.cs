@@ -1,5 +1,6 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
@@ -14,7 +15,7 @@ public class ObjectPool : MonoBehaviour
     public int coinPoolSize = 30;
     public int enemyPoolSize = 6;
 
-    private Queue<GameObject> coinPool = new Queue<GameObject>();
+    private Queue<GameObject> coinPool = new Queue<GameObject>(); // fifo
     private Queue<GameObject> enemyPool = new Queue<GameObject>();
 
     private void Awake()
@@ -31,7 +32,7 @@ public class ObjectPool : MonoBehaviour
         InitPool(enemyPrefab, enemyPoolSize, enemyPool);
     }
 
-    void InitPool(GameObject prefab, int size, Queue<GameObject> pool)
+    void InitPool(GameObject prefab, int size, Queue<GameObject> pool) // Tạo sẵn ob và disable all, cất vào Queue
     {
         for (int i = 0; i < size; i++)
         {
@@ -51,6 +52,7 @@ public class ObjectPool : MonoBehaviour
     }
     public void ReturnCoin(GameObject coin)
     {
+        coin.SetActive(false);
         coinPool.Enqueue(coin);
     }
     public GameObject GetEnemy(Vector3 pos)

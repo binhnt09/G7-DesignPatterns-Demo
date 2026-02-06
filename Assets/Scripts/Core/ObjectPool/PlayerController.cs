@@ -58,4 +58,27 @@ public class PlayerController : MonoBehaviour
             animator.SetTrigger("Attack");
         }
     }
+
+    // Thêm biến này vào PlayerController
+    public int stressTestAmount = 500; // Số lượng đủ lớn để gây khựng hình
+
+    private void HandleCombat1()
+    {
+        // ... logic Z (tấn công dùng pool) giữ nguyên ...
+
+        // TÌNH HUỐNG GIẢ LAG: Nhấn phím L
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            Debug.Log("Stress Test: Đang ép CPU cấp phát bộ nhớ rác...");
+            for (int i = 0; i < stressTestAmount; i++)
+            {
+                // 1. KHÔNG dùng Pool: Ép Unity tìm vùng nhớ mới, nạp Prefab, khởi tạo Component
+                GameObject trash = Instantiate(ObjectPool.Instance.enemyPrefab, transform.position + (Vector3)Random.insideUnitCircle * 10, Quaternion.identity);
+
+                // 2. KHÔNG dùng Return: Xóa ngay lập tức để tạo "Rác" (Garbage)
+                // Việc Destroy hàng loạt sẽ bắt Garbage Collector phải chạy, gây ra hiện tượng khựng (Spike)
+                Destroy(trash, 0.05f);
+            }
+        }
+    }
 }
