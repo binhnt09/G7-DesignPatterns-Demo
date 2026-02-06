@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     private float jumpForce = 15f;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
-    private bool isGrounded;
+    private bool isGrounded = true;
 
     private Rigidbody2D rb;
     Animator animator;
@@ -18,62 +18,44 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
     }
-    void Start()
-    {
+    void Start() { }
 
-    }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+
         HandleMovement();
         HandleJump();
+        HandleCombat();
+    }
+
+    private void HandleJump()
+    {
+        animator.SetBool("IsGrounded", isGrounded);
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            animator.SetTrigger("Jump");
+        }
     }
 
     private void HandleMovement()
     {
         float moveInput = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-
         rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
 
         if (moveInput > 0) transform.localScale = new Vector3(-5, 4, 1);
-        if (moveInput < 0) transform.localScale = new Vector3(5, 4, 1);
+        else if (moveInput < 0) transform.localScale = new Vector3(5, 4, 1);
 
-        if (moveInput == 0) animator.SetBool("IsRunning", false);
-        else animator.SetBool("IsRunning", true);
-
-        AttackAndJump();
-    }
-    private void HandleJump()
-    {
-        if (Input.GetButtonDown("Jump") && isGrounded)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        }
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+        animator.SetBool("IsRunning", moveInput != 0);
     }
 
-    public void AttackAndJump()
+    private void HandleCombat()
     {
-        animator.SetBool("IsGrounded", isGrounded);
-        if ((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetButtonDown("Jump")) && isGrounded)
-        {
-            animator.SetTrigger("Jump");
-            isGrounded = false;
-        }
-
         if (Input.GetKeyDown(KeyCode.Z))
         {
             animator.SetTrigger("Attack");
-        }
-    }
-    public void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-            animator.SetBool("IsGrounded", true);
         }
     }
 }
